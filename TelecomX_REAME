@@ -1,0 +1,39 @@
+# 📌 Extração
+Este bloco de código realiza a extração e limpeza dos dados do dataset `TelecomX_Data.json`.
+
+```python
+import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
+
+# Carregar os dados
+url = "https://raw.githubusercontent.com/ingridcristh/challenge2-data-science/refs/heads/main/TelecomX_Data.json"
+df = pd.read_json(url)
+
+# Transformar colunas contendo dicionários em DataFrames separados
+account_df = df["account"].apply(pd.Series)
+df = pd.concat([df, account_df], axis=1)
+
+internet_df = df["internet"].apply(pd.Series)
+df = pd.concat([df, internet_df], axis=1)
+
+phone_df = df["phone"].apply(pd.Series)
+df = pd.concat([df, phone_df], axis=1)
+
+customer_df = df["customer"].apply(pd.Series)
+df = pd.concat([df, customer_df], axis=1)
+
+# Converter variáveis categóricas para numéricas (exemplo: 'Churn')
+df["Churn"] = df["Churn"].map({"Yes": 1, "No": 0})
+
+# Selecionar apenas colunas numéricas
+df_numeric = df.select_dtypes(include=["number"])
+
+# Calcular matriz de correlação
+corr_matrix = df_numeric.corr()
+
+# Criar matriz de correlação visual
+plt.figure(figsize=(10, 6))
+sns.heatmap(corr_matrix, annot=True, cmap="coolwarm", fmt=".2f", linewidths=0.5)
+plt.title("Matriz de Correlação das Variáveis Numéricas")
+plt.show()
