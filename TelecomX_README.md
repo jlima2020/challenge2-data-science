@@ -1,42 +1,27 @@
 # 📌 Extração
 Este bloco de código realiza a extração e limpeza dos dados do dataset `TelecomX_Data.json`.
-
-```python
+import requests
 import pandas as pd
-import seaborn as sns
-import matplotlib.pyplot as plt
 
-# Carregar os dados
-url = "https://raw.githubusercontent.com/ingridcristh/challenge2-data-science/refs/heads/main/TelecomX_Data.json"
-df = pd.read_json(url)
+# URL do arquivo JSON
+url = "https://raw.githubusercontent.com/jlima2020/challenge2-data-science/main/TelecomX_Data.json"
 
-# Transformar colunas contendo dicionários em DataFrames separados
-account_df = df["account"].apply(pd.Series)
-df = pd.concat([df, account_df], axis=1)
+# Fazendo a requisição
+response = requests.get(url)
 
-internet_df = df["internet"].apply(pd.Series)
-df = pd.concat([df, internet_df], axis=1)
+# Verificando se a requisição foi bem-sucedida
+if response.status_code == 200:
+    data = response.json()
 
-phone_df = df["phone"].apply(pd.Series)
-df = pd.concat([df, phone_df], axis=1)
+    # Convertendo JSON para DataFrame
+    df = pd.DataFrame(data)
 
-customer_df = df["customer"].apply(pd.Series)
-df = pd.concat([df, customer_df], axis=1)
+    # Visualizando as primeiras linhas
+    print(df.head())
 
-# Converter variáveis categóricas para numéricas (exemplo: 'Churn')
-df["Churn"] = df["Churn"].map({"Yes": 1, "No": 0})
+else:
+    print(f"Erro ao acessar os dados: {response.status_code}")
 
-# Selecionar apenas colunas numéricas
-df_numeric = df.select_dtypes(include=["number"])
-
-# Calcular matriz de correlação
-corr_matrix = df_numeric.corr()
-
-# Criar matriz de correlação visual
-plt.figure(figsize=(10, 6))
-sns.heatmap(corr_matrix, annot=True, cmap="coolwarm", fmt=".2f", linewidths=0.5)
-plt.title("Matriz de Correlação das Variáveis Numéricas")
-plt.show()
 
 # 🔧 Transformação de Dados
 
