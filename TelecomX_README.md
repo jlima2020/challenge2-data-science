@@ -37,3 +37,105 @@ plt.figure(figsize=(10, 6))
 sns.heatmap(corr_matrix, annot=True, cmap="coolwarm", fmt=".2f", linewidths=0.5)
 plt.title("Matriz de Correlação das Variáveis Numéricas")
 plt.show()
+
+# 🔧 Transformação de Dados
+
+Este bloco de código realiza a transformação dos dados, garantindo qualidade e consistência para análises futuras.
+
+import requests
+import pandas as pd
+
+# URL do arquivo JSON
+url = "https://raw.githubusercontent.com/jlima2020/challenge2-data-science/main/TelecomX_Data.json"
+
+# Fazendo a requisição
+response = requests.get(url)
+
+# Verificando se a requisição foi bem-sucedida
+if response.status_code == 200:
+    data = response.json()
+
+    # Convertendo JSON para DataFrame
+    df = pd.DataFrame(data)
+
+    # Visualizando as primeiras linhas
+    print(df.head())
+
+else:
+    print(f"Erro ao acessar os dados: {response.status_code}")
+
+
+# Verificar as primeiras linhas do dataset
+print(df.head())
+
+# Exibir informações sobre as colunas e tipos de dados
+print(df.info())
+
+# Verificar os tipos de dados de cada coluna
+print(df.dtypes)
+
+import pandas as pd
+
+# Exibindo informações gerais do DataFrame
+print("== Informações Gerais ==")
+print(df.info())
+
+# Visualizando os tipos de dados
+print("\n== Tipos de Dados ==")
+print(df.dtypes)
+
+# Checando valores ausentes em cada coluna
+print("\n== Valores Ausentes ==")
+print(df.isnull().sum())
+
+# Verificando registros duplicados
+# Before checking for duplicates, identify columns that might contain unhashable types like dictionaries.
+# We can iterate through object type columns and check the type of their elements.
+object_cols = df.select_dtypes(include=['object']).columns
+cols_to_drop_for_dup_check = []
+for col in object_cols:
+    try:
+        # Attempt to apply a hashable operation to see if it fails
+        df[col].apply(hash)
+    except TypeError:
+        print(f"Coluna '{col}' parece conter tipos não hashable (como dicionários).")
+        # If this column is not essential for duplicate checking, consider excluding it.
+        # For simplicity, let's assume we can drop such columns for the duplicate check.
+        cols_to_drop_for_dup_check.append(col)
+
+
+# Check for duplicates, excluding columns identified as potentially containing unhashable types.
+# If cols_to_drop_for_dup_check is empty, df_for_dup_check will be the original df.
+df_for_dup_check = df.drop(columns=cols_to_drop_for_dup_check, errors='ignore')
+
+# Now perform the duplicate check on the potentially modified DataFrame
+dup_count = df_for_dup_check.duplicated().sum()
+print(f"\n== Registros Duplicados: {dup_count} ==")
+
+
+# Checando inconsistências em colunas categóricas (usando pandas.unique)
+# We should only perform unique check on columns that are actually categorical strings,
+# not potentially dictionary columns.
+categorical_columns = df.select_dtypes(include=['object']).columns
+for col in categorical_columns:
+    # Skip columns we identified as having unhashable types if we are not processing them
+    if col in cols_to_drop_for_dup_check:
+         print(f"\nSkipping unique value check for column '{col}' due to unhashable types.")
+         continue
+    unique_values = df[col].unique()
+    print(f"\nColuna '{col}' - Valores Únicos:")
+    print(unique_values)
+
+# Se houver colunas com datas, é importante padronizá-las.
+# Suponha que haja uma coluna 'data_registro' que precise ser convertida.
+if 'data_registro' in df.columns:
+    # Converter a coluna para o tipo datetime
+    df['data_registro'] = pd.to_datetime(df['data_registro'], errors='coerce')
+
+    # Normalizando a data (removendo a parte do tempo)
+    df['data_registro_normalizada'] = df['data_registro'].dt.normalize()
+
+    print("\n== Exemplo de Normalização de Datas ==")
+    print(df[['data_registro', 'data_registro_normalizada']].head())
+
+
