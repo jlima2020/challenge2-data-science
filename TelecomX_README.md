@@ -138,4 +138,30 @@ if 'data_registro' in df.columns:
     print("\n== Exemplo de Normalização de Datas ==")
     print(df[['data_registro', 'data_registro_normalizada']].head())
 
+# 📊 Carga e Análise dos Dados
 
+Este bloco de código realiza a carga e análise dos dados, ajudando a entender a base de dados **ETL** e a identificar padrões que possam explicar a **diminuição de clientes**.
+
+## 📌 Análise da Evasão de Clientes
+
+Abaixo, um gráfico que mostra a distribuição dos clientes que permaneceram ou saíram.
+
+```python
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+# Verificar se a coluna 'Churn' existe no DataFrame
+if 'Churn' in df_cleaned.columns:
+    # Contar os valores de churn
+    churn_counts = df_cleaned['Churn'].value_counts()
+
+    # Criar o gráfico de barras
+    plt.figure(figsize=(8, 6))
+    sns.barplot(x=churn_counts.index, y=churn_counts.values, palette="pastel")
+    plt.xlabel("Status do Cliente")
+    plt.ylabel("Número de Clientes")
+    plt.title("Distribuição de Clientes por Evasão")
+    plt.xticks(ticks=[0, 1], labels=["Permaneceu", "Saiu"])
+    plt.show()
+else:
+    print("Erro: A coluna 'Churn' não foi encontrada no DataFrame.")
